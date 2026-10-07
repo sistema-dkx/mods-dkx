@@ -3,6 +3,7 @@ import type { Register, SessionRateLimit, SessionUsage } from 'claude-code'
 import type { Uso } from '../types'
 
 const USO = { plugin: 'barra-de-uso', key: 'uso' } as const
+const PROGRESSO = { plugin: 'barra-de-uso', key: 'progresso' } as const
 const COMPACTANDO = { plugin: 'barra-de-uso', key: 'compactando' } as const
 
 const INSTRUCOES =
@@ -57,12 +58,14 @@ export const register: Register = on => {
   on('session.start', async ($, e, next) => {
     const novo = montar(await $.session.usage(), await $.clock.now())
     await $.state.set(USO, novo)
+    await $.state.set(COMPACTANDO, false)
     return next(e)
   })
 
   on('turn.complete', async ($, e, next) => {
     const novo = montar(await $.session.usage(), await $.clock.now())
     await $.state.set(USO, novo)
+    await $.state.set(COMPACTANDO, false)
     return next(e)
   })
 
@@ -72,13 +75,30 @@ export const register: Register = on => {
 
     const { Box, Text, Button } = $.ui.resolve(e)
     const { value: ocupado = false } = await $.state.get(COMPACTANDO)
+    const { value: prog = { passo: 0, seg: 0 } } = await $.state.get(PROGRESSO)
+    const pontos = '.'.repeat((prog.passo % 3) + 1).padEnd(3, ' ')
+    const deslizante = Array.from({ length: 8 }, (_, i) => (Math.abs(i - (prog.passo % 14 < 8 ? prog.passo % 14 : 14 - (prog.passo % 14))) <= 1 ? '▰' : '▱')).join('')
+    const textoOcupado = `Compactando${pontos} ${deslizante} ${prog.seg}s`
     const ctx = u.contexto
     const alerta = ctx !== null && ctx >= LIMITE_ALERTA
     const k = (n: number | null) => (n === null ? '?' : `${Math.round(n / 1000)}k`)
 
     const compactar = async () => {
       await $.state.set(COMPACTANDO, true)
-      const r = await $.session.compact({ instructions: INSTRUCOES })
+      const inicio = await $.clock.now()
+      let feito = false
+      const pronto = $.session.compact({ instructions: INSTRUCOES }).then(r => {
+        feito = true
+        return r
+      })
+      let passo = 0
+      while (!feito) {
+        const agora = await $.clock.now()
+        await $.state.set(PROGRESSO, { passo, seg: Math.floor((agora - inicio) / 1000) })
+        passo += 1
+        await $.clock.sleep(400)
+      }
+      const r = await pronto
       await $.state.set(COMPACTANDO, false)
       $.ui.toast('skip' in r && r.skip ? `Compactação não feita: ${r.skip}` : 'Sessão compactada.')
       const novo = montar(await $.session.usage(), await $.clock.now())
@@ -98,7 +118,7 @@ export const register: Register = on => {
               <Button
                 key="compactar"
                 variant="primary"
-                label={ocupado ? 'Compactando...' : 'Registrar e compactar agora'}
+                label={ocupado ? textoOcupado : 'Registrar e compactar agora'}
                 onPress={() => (ocupado ? undefined : compactar())}
               />
             </Box>
@@ -108,7 +128,7 @@ export const register: Register = on => {
               <Button
                 key="compactar"
                 plain
-                label={ocupado ? 'Compactando...' : 'Registrar e compactar'}
+                label={ocupado ? textoOcupado : 'Registrar e compactar'}
                 onPress={() => (ocupado ? undefined : compactar())}
               />
               <Text color={LARANJA}> ]</Text>
