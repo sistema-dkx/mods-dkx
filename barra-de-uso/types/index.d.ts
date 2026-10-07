@@ -8,6 +8,6 @@ export type Uso = {
 
 declare module 'claude-code' {
   interface PluginState {
-    'barra-de-uso': { uso: Uso | null; compactando: boolean; progresso: { passo: number; seg: number } }
+    'barra-de-uso': { uso: Uso | null }
   }
 }

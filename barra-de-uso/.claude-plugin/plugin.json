@@ -1,1 +1,1 @@
-{ "name": "barra-de-uso", "version": "1.1.0", "description": "Barra acima do prompt: contexto, limite de 5h e semanal, com botão de compactar", "types": "./types/index.d.ts" }
+{ "name": "barra-de-uso", "version": "1.2.0", "description": "Barra acima do prompt: contexto, limite de 5h e semanal, com botão de compactar", "types": "./types/index.d.ts" }

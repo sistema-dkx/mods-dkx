@@ -47,7 +47,7 @@ Contexto ███░░░░░░░░░░░░░░░░░ 14% (138k/
 
 - Barra e porcentagem do **contexto** usado na sessão, com os tokens usados e o tamanho da janela do modelo.
 - Quanto mais cheio o contexto, mais cara e menos precisa fica a conversa. Compactar resume o que já foi feito e libera espaço.
-- **Botão `[ Registrar e compactar ]`:** sempre disponível. Ao clicar, a sessão é compactada na hora e um aviso confirma. O resumo é instruído a preservar objetivo, decisões e o porquê delas, arquivos mexidos, o que está feito e o que falta, pendências, erros encontrados e suas preferências.
+- **Botão `[ Registrar e compactar ]`:** sempre disponível. Ao clicar, ele faz duas coisas **direto na conversa**: primeiro pede ao Claude para salvar na memória o que for importante (decisões, pendências, preferências, estado do trabalho) e depois roda o `/compact`, instruído a preservar objetivo, decisões, arquivos mexidos, o que falta e erros encontrados. Você acompanha tudo no próprio histórico, sem esperar uma barra parada.
 - **Alerta aos 50%:** quando o contexto passa de 50%, aparece uma etiqueta laranja **"Hora de compactar"** e o botão vira **"Registrar e compactar agora"**. É o sinal de que está na hora.
 
 ### Segunda linha: seus limites de uso
@@ -75,6 +75,7 @@ Edite as constantes no topo do [`register.tsx`](barra-de-uso/hooks/register.tsx)
 | --- | --- | --- |
 | `LIMITE_ALERTA` | % de contexto a partir do qual aparece o alerta | `50` |
 | `LARANJA` | cor das barras | `#FC6715` |
+| `PEDIDO_REGISTRO` | o que o Claude deve salvar na memória antes de compactar | texto em pt-BR |
 | `INSTRUCOES` | o que o resumo da compactação deve preservar | texto em pt-BR |
 
 Na função `blocos`, `n = 6` é o número de blocos da barra semanal.
