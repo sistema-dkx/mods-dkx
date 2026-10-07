@@ -1,0 +1,12 @@
+{
+  "name": "mods-dkx",
+  "metadata": { "description": "Mods da DKX para o Claude Code" },
+  "owner": { "name": "DKX" },
+  "plugins": [
+    {
+      "name": "barra-de-uso",
+      "description": "Barra acima do prompt: contexto, limite de 5h e semanal, com botão de compactar",
+      "source": "./barra-de-uso"
+    }
+  ]
+}
